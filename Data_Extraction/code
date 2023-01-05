@@ -1,0 +1,42 @@
+import requests
+from bs4 import BeautifulSoup
+import nltk
+
+# Download required NLTK resources
+nltk.download("vader_lexicon")
+nltk.download("stopwords")
+
+# Import required NLTK modules
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+# Set the URL to crawl
+url = "https://www.example.com/article"
+
+# Make a request to the URL and retrieve the HTML
+response = requests.get(url)
+html = response.text
+
+# Use BeautifulSoup to parse the HTML
+soup = BeautifulSoup(html, "html.parser")
+
+# Extract the article title and text
+title = soup.find("h1", class_="article-title").text
+article_text = soup.find("div", class_="article-text").text
+
+# Preprocess the text by removing stop words
+stop_words = set(stopwords.words("english"))
+words = [word for word in word_tokenize(article_text) if word not in stop_words]
+
+# Initialize the sentiment analyzer
+sid = SentimentIntensityAnalyzer()
+
+# Calculate the sentiment scores for each word
+scores = [sid.polarity_scores(word)["compound"] for word in words]
+
+# Calculate the overall sentiment of the text
+sentiment = sum(scores) / len(scores)
+
+# Print the sentiment score
+print(sentiment)
