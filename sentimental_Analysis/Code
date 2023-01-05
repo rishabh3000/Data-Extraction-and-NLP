@@ -1,0 +1,67 @@
+import nltk
+import os
+
+# Download required NLTK resources
+nltk.download("vader_lexicon")
+nltk.download("stopwords")
+nltk.download("averaged_perceptron_tagger")
+
+# Import required NLTK modules
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.tag import pos_tag
+
+# Initialize the sentiment analyzer
+sid = SentimentIntensityAnalyzer()
+
+# Initialize a list to store the results
+results = []
+
+# Read in the list of text files
+for file in os.listdir("text_files"):
+    # Read in the text from the file
+    with open(os.path.join("text_files", file), "r") as f:
+        text = f.read()
+
+    # Preprocess the text by removing stop words
+    stop_words = set(stopwords.words("english"))
+    words = [word for word in word_tokenize(text) if word not in stop_words]
+
+    # Calculate the sentiment scores for each word
+    scores = [sid.polarity_scores(word)["compound"] for word in words]
+
+    # Calculate the overall sentiment of the text
+    sentiment = sum(scores) / len(scores)
+
+    # Calculate the positive score
+    positive_score = sum([score for score in scores if score > 0]) / len(scores)
+
+    # Calculate the negative score
+    negative_score = sum([score for score in scores if score < 0]) / len(scores)
+
+    # Calculate the average sentence length
+    sentences = text.split(".")
+    avg_sentence_length = sum([len(sentence.split(" ")) for sentence in sentences]) / len(sentences)
+
+    # Calculate the percentage of complex words
+    complex_words = [word for word in words if len(word) > 3 and pos_tag([word])[0][1] == "JJ"]
+    percentage_complex_words = len(complex_words) / len(words)
+
+    # Calculate the FOG index
+    fog_index = 0.4 * (avg_sentence_length + percentage_complex_words)
+
+    # Calculate the average number of words per sentence
+    avg_words_per_sentence = len(words) / len(sentences)
+
+    # Calculate the complex word count
+    complex_word_count = len(complex_words)
+
+    # Calculate the word count
+    word_count = len(words)
+
+    # Calculate the syllables per word
+    syllables_per_word = sum([len([syllable for syllable in word if syllable in "aeiouAEIOU"]) for word in words]) / len(words)
+
+    # Calculate the personal pronoun count
+    personal_pronouns = [word for word in words if word.lower() in ["i", "me", "my", "mine", "myself", "you", "your", "yours", "
